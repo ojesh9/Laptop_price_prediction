@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <title>Laptop Price Predictor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-animate"></div>
+  <main class="container">
+    <div class="logo-strip">
+      <img src="/static/dell.png" alt="Dell">
+      <img src="/static/hp.png" alt="HP">
+      <img src="/static/lenovo.png" alt="Lenovo">
+      <img src="/static/asus.png" alt="Asus">
+      <img src="/static/acer.png" alt="Acer">
+      <img src="/static/msi.png" alt="MSI">
+      <img src="/static/apple.png" alt="Apple">
+    </div>
+    
+    <section class="card glass">
+      <h1 class="title">Laptop Price Predictor</h1>
+      <p class="subtitle">Premium UI • Glassmorphism • Animated</p>
+
+      <form id="predict-form">
+        <div class="grid">
+          <label>Company
+            <select name="Company" id="Company">
+              {% for c in companies %}
+                <option value="{{c}}">{{c}}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>Type
+            <select name="TypeName" id="TypeName">
+              {% for t in types %}
+                <option value="{{t}}">{{t}}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>CPU Company
+            <select name="CPU_Company" id="CPU_Company">
+              {% for c in cpu_companies %}
+                <option value="{{c}}">{{c}}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>CPU Type
+            <input type="text" name="CPU_Type" id="CPU_Type" placeholder="e.g., i7-1165G7 or Ryzen 7">
+          </label>
+
+          <label>GPU Company
+            <select name="GPU_Company" id="GPU_Company">
+              {% for g in gpu_companies %}
+                <option value="{{g}}">{{g}}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>GPU Type
+            <input type="text" name="GPU_Type" id="GPU_Type" placeholder="e.g., GTX 1650 or Iris Xe">
+          </label>
+
+          <label>OS
+            <select name="OpSys" id="OpSys">
+              {% for o in ops %}
+                <option value="{{o}}">{{o}}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <label>Screen Inches
+            <input name="Inches" id="Inches" type="number" step="0.1" min="8" max="20" placeholder="13.3">
+          </label>
+
+          <label>Screen Resolution
+            <input type="text" name="ScreenResolution" id="ScreenResolution" placeholder="e.g., 1920x1080">
+          </label>
+          
+          <label>CPU Frequency (GHz)
+            <input name="CPU_Frequency" id="CPU_Frequency" type="number" step="0.1" placeholder="2.4">
+          </label>
+
+          <label>RAM (GB)
+            <input name="RAM_GB" id="RAM_GB" type="number" step="1" min="1" placeholder="8">
+          </label>
+
+          <label>SSD (GB)
+            <input name="SSD_GB" id="SSD_GB" type="number" step="1" min="0" placeholder="512">
+          </label>
+
+          <label>HDD (GB)
+            <input name="HDD_GB" id="HDD_GB" type="number" step="1" min="0" placeholder="0">
+          </label>
+
+          <label>Weight (kg)
+            <input name="Weight_kg" id="Weight_kg" type="number" step="0.01" placeholder="1.25">
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn">Predict Price</button>
+          <div id="result" class="result-card" aria-live="polite"></div>
+        </div>
+      </form>
+
+      <p class="hint">Tip: If your category is not in the dropdown, type it manually in the 'Type' / 'CPU Type' fields.</p>
+    </section>
+  </main>
+
+<script>
+document.getElementById("predict-form").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const form = e.target;
+
+  const data = {
+    Company: form.Company.value,
+    TypeName: form.TypeName.value,
+    CPU_Company: form.CPU_Company.value,
+    CPU_Type: form.CPU_Type.value || "Other",
+    GPU_Company: form.GPU_Company.value,
+    GPU_Type: form.GPU_Type.value || "Other",
+    OpSys: form.OpSys.value,
+    Inches: form.Inches.value,
+    ScreenResolution: form.ScreenResolution.value,
+    CPU_Frequency: form.CPU_Frequency.value,
+    RAM_GB: form.RAM_GB.value,
+    SSD_GB: form.SSD_GB.value,
+    HDD_GB: form.HDD_GB.value,
+    Weight: form.Weight_kg.value
+  };
+
+  const resultDiv = document.getElementById("result");
+  resultDiv.innerHTML = "Predicting…";
+
+  try {
+    const resp = await fetch("/predict", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(data)
+    });
+
+    const json = await resp.json();
+
+    if (json.success) {
+      resultDiv.innerHTML = `<div class="price">Predicted price: ₹ ${json.predicted_price}</div>`;
+    } else {
+      resultDiv.innerHTML = `<div class="error">Error: ${json.error || "unknown"}</div>`;
+    }
+
+  } catch (err) {
+    resultDiv.innerHTML = `<div class="error">Network error: ${err.message}</div>`;
+  }
+
+});
+</script>
+
+</script>
+</body>
+</html>
