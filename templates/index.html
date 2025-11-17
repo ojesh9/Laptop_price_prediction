@@ -148,7 +148,7 @@ document.getElementById("predict-form").addEventListener("submit", async functio
     const json = await resp.json();
 
     if (json.success) {
-      resultDiv.innerHTML = `<div class="price">Predicted price: ₹ ${json.predicted_price}</div>`;
+      resultDiv.innerHTML = `<div class="price">Predicted price: $ ${json.predicted_price}</div>`;
     } else {
       resultDiv.innerHTML = `<div class="error">Error: ${json.error || "unknown"}</div>`;
     }
